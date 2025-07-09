@@ -53,6 +53,12 @@ jobs:
           N8N_URL: ${{ secrets.N8N_URL }}
           N8N_KEY: ${{ secrets.N8N_KEY }}
 
+      - name: Upload artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gmail-output
+          path: output.json
+
     env:
       MAIL_USER: ${{ secrets.MAIL_USER }}
       TOKEN_JSON_B64: ${{ secrets.TOKEN_JSON_B64 }}
