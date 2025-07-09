@@ -38,7 +38,7 @@ jobs:
       - name: Run mail fetch script
         id: fetch
         run: |
-          python gmail_fetch.py > mail.html
+          python gmail_fetch.py > mail.html   # stdout = HTML pur
 
       - name: Send result to n8n webhook
         if: success() && env.N8N_URL != ''
