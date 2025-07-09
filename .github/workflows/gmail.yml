@@ -4,7 +4,11 @@ on:
   schedule:
     # toutes les heures, ajuste si besoin (cron syntaxe UTC)
     - cron: "0 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      gmail_filter:
+        description: "Requête Gmail (optionnelle)"
+        required: false
 
 jobs:
   fetch-gmail-and-notify:
@@ -52,4 +56,4 @@ jobs:
     env:
       MAIL_USER: ${{ secrets.MAIL_USER }}
       TOKEN_JSON_B64: ${{ secrets.TOKEN_JSON_B64 }}
-      GMAIL_FILTER: ${{ secrets.GMAIL_FILTER }} 
+      GMAIL_FILTER: ${{ github.event.inputs.gmail_filter || secrets.GMAIL_FILTER }} 

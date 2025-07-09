@@ -21,6 +21,10 @@ pip install -r requirements.txt  # ou laisser le script installer les libs
    python gmail_fetch.py
    ```
    Le navigateur s’ouvre ; après validation le fichier **token.json** est créé.
+Les fichiers **credentials_default.json** et **token_default.json** fournis dans ce dépôt servent d’exemple ; copiez-les en `credentials.json` et `token.json` puis remplissez-les avec vos vraies valeurs.
+
+* `credentials.json` s’obtient depuis Google Cloud Console (ID client « Application de bureau »).  
+* `token.json` est généré automatiquement après le premier lancement interactif ; vous pouvez ensuite l’encoder en Base-64 pour `TOKEN_JSON_B64`.
 
 ---
 ## 2. Déploiement GitHub Actions
@@ -52,8 +56,7 @@ Utilisez la même syntaxe que dans la barre de recherche Gmail : `label:"Nom"`, 
 
 ---
 ## 4. Sécurité
-* Ne commitez jamais `credentials.json` ni `token.json`.  
-  Ils sont ignorés via `.gitignore` et stockés comme secrets.
+* Ne commitez jamais vos **vrais** `credentials.json` / `token.json`. Utilisez les fichiers *_default.json* comme modèles.
 * Les secrets GitHub sont chiffrés au repos et injectés en variables d’environnement uniquement pendant le job.
 
 ---
@@ -65,3 +68,11 @@ const buff = Buffer.from($json.html, 'base64');
 return [{ json: { html: buff.toString('utf-8') } }];
 ```
 Vous pouvez ensuite parser ou stocker le contenu comme vous le souhaitez. 
+
+---
+## 6. Créer un Personal Access Token GitHub
+
+1. Pour un **classic PAT** : <https://github.com/settings/tokens> → « Generate new token (classic) ».  
+2. Pour un **fine-grained token** : <https://github.com/settings/personal-access-tokens/new>.
+
+Accordez au minimum le scope `repo` (actions déclenchées dans le dépôt).  Copiez-le et stockez-le dans n8n (HTTP Basic Auth : username vide, password = PAT). 
