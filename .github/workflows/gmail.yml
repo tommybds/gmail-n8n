@@ -1,0 +1,55 @@
+name: Gmail ➜ n8n
+
+on:
+  schedule:
+    # toutes les heures, ajuste si besoin (cron syntaxe UTC)
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  fetch-gmail-and-notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          # si requirements.txt existe, l'utiliser, sinon installer libs nécessaires
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install google-auth google-auth-oauthlib google-auth-httplib2; fi
+
+      - name: Recreate credentials.json from secret
+        run: |
+          echo "$CREDENTIALS_JSON" | base64 -d > credentials.json
+        env:
+          CREDENTIALS_JSON: ${{ secrets.CREDENTIALS_JSON }}
+
+      - name: Run mail fetch script
+        id: fetch
+        run: |
+          python gmail_fetch.py > mail.html
+
+      - name: Send result to n8n webhook
+        if: success() && env.N8N_URL != ''
+        run: |
+          b64=$(base64 -w0 mail.html)
+          curl -X POST \
+               -H "Content-Type: application/json" \
+               -H "X-API-Key: $N8N_KEY" \
+               -d "{\"html\":\"$b64\"}" \
+               "$N8N_URL"
+        env:
+          N8N_URL: ${{ secrets.N8N_URL }}
+          N8N_KEY: ${{ secrets.N8N_KEY }}
+
+    env:
+      MAIL_USER: ${{ secrets.MAIL_USER }}
+      TOKEN_JSON_B64: ${{ secrets.TOKEN_JSON_B64 }}
+      GMAIL_FILTER: ${{ secrets.GMAIL_FILTER }} 
