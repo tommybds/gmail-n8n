@@ -131,6 +131,4 @@ if __name__ == "__main__":
     filter_query = os.getenv("GMAIL_FILTER")
     html = fetch_last_mail_html(filter_query)
     if html:
-        with open("output.json", "w") as f:
-            json.dump({"html": html}, f)
-        print("HTML saved to output.json") 
+        print(html) 
