@@ -1,13 +1,13 @@
 name: Gmail ➜ n8n
 
 on:
-  schedule:
-    # toutes les heures, ajuste si besoin (cron syntaxe UTC)
-    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
+      resumeUrl:
+        description: "Webhook URL générée par n8n"
+        required: false
       gmail_filter:
-        description: "Requête Gmail (optionnelle)"
+        description: "Requête Gmail (facultatif)"
         required: false
 
 jobs:
@@ -52,6 +52,13 @@ jobs:
         env:
           N8N_URL: ${{ secrets.N8N_URL }}
           N8N_KEY: ${{ secrets.N8N_KEY }}
+
+      - name: Reprendre n8n
+        if: ${{ github.event.inputs.resumeUrl != '' }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+               -d "{\"html\":\"$(base64 -w0 mail.html)\"}" \
+               "${{ github.event.inputs.resumeUrl }}"
 
     env:
       MAIL_USER: ${{ secrets.MAIL_USER }}
